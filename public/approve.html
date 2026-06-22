@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fenevision Request - Approval</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #e8e8e8;
+    margin: 0;
+    padding: 24px 12px 60px;
+    color: #222;
+  }
+  .card {
+    background: #fff;
+    max-width: 640px;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    overflow: hidden;
+  }
+  .card-header {
+    background: #0078d4;
+    color: #fff;
+    padding: 18px 24px;
+  }
+  .card-header .card-title { font-size: 20px; font-weight: 700; }
+  .card-header .step-label { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+  .card-body { padding: 20px 24px 28px; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 18px; }
+  td { padding: 6px 0; vertical-align: top; }
+  td.label { font-weight: 600; width: 130px; white-space: nowrap; }
+  textarea {
+    width: 100%;
+    min-height: 70px;
+    padding: 9px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 16px;
+  }
+  .btn-row { display: flex; gap: 12px; }
+  button {
+    flex: 1;
+    border: none;
+    border-radius: 4px;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .approve-btn { background: #1e8e3e; color: #fff; }
+  .approve-btn:hover { background: #176b30; }
+  .reject-btn { background: #c0392b; color: #fff; }
+  .reject-btn:hover { background: #962d22; }
+  button:disabled { background: #aaa; cursor: default; }
+  #message {
+    padding: 14px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  #message.info { background: #e8f1fb; color: #0050a0; }
+  #message.success { background: #dff6dd; color: #1e6b1e; }
+  #message.error { background: #fce8e8; color: #a92020; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Fenevision Request Approval</div>
+      <div class="step-label" id="step-label"></div>
+    </div>
+    <div class="card-body" id="card-body">
+      <div id="message" class="info">Loading request...</div>
+    </div>
+  </div>
+
+  <script>
+    const token = window.location.pathname.split("/").pop();
+    const cardBody = document.getElementById("card-body");
+    const stepLabel = document.getElementById("step-label");
+
+    function esc(value) {
+      const div = document.createElement("div");
+      div.textContent = value ?? "";
+      return div.innerHTML;
+    }
+
+    function showMessage(text, type) {
+      cardBody.innerHTML = `<div id="message" class="${type}">${esc(text)}</div>`;
+    }
+
+    async function load() {
+      try {
+        const res = await fetch(`/api/approval/${token}`);
+        const data = await res.json();
+        if (!res.ok) {
+          showMessage(data.error || "Unable to load this request.", "error");
+          return;
+        }
+        render(data);
+      } catch (err) {
+        showMessage("Unable to load this request. Please try again.", "error");
+      }
+    }
+
+    function render({ approval, request, totalSteps }) {
+      stepLabel.textContent = `Step ${approval.step_number} of ${totalSteps} - ${approval.approver_name}`;
+
+      if (approval.status !== "pending") {
+        showMessage(`This request was already ${approval.status} by you.`, "info");
+        return;
+      }
+
+      cardBody.innerHTML = `
+        <table>
+          <tr><td class="label">Requested By</td><td>${esc(request.submitted_by)} (${esc(request.submitted_by_email)})</td></tr>
+          <tr><td class="label">Request Type</td><td>${esc(request.request_type)}</td></tr>
+          <tr><td class="label">Urgency</td><td>${esc(request.urgency)}</td></tr>
+          <tr><td class="label">Description</td><td>${esc(request.description)}</td></tr>
+          ${request.notes ? `<tr><td class="label">Notes</td><td>${esc(request.notes)}</td></tr>` : ""}
+        </table>
+        <textarea id="comments" placeholder="Optional comments"></textarea>
+        <div class="btn-row">
+          <button type="button" class="approve-btn" id="approve-btn">Approve</button>
+          <button type="button" class="reject-btn" id="reject-btn">Reject</button>
+        </div>
+      `;
+
+      document.getElementById("approve-btn").addEventListener("click", () => decide("approve"));
+      document.getElementById("reject-btn").addEventListener("click", () => decide("reject"));
+    }
+
+    async function decide(decision) {
+      const approveBtn = document.getElementById("approve-btn");
+      const rejectBtn = document.getElementById("reject-btn");
+      const comments = document.getElementById("comments").value;
+
+      approveBtn.disabled = true;
+      rejectBtn.disabled = true;
+
+      try {
+        const res = await fetch(`/api/approval/${token}/decide`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ decision, comments }),
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || "Failed to record your decision.");
+
+        showMessage(
+          decision === "approve" ? "Thank you - this request has been approved." : "This request has been rejected.",
+          "success"
+        );
+      } catch (err) {
+        showMessage(err.message, "error");
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fenevision Request - Admin</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #e8e8e8;
+    margin: 0;
+    padding: 24px 12px 60px;
+    color: #222;
+  }
+  .card {
+    background: #fff;
+    max-width: 1100px;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    overflow: hidden;
+  }
+  .card-header {
+    background: #0078d4;
+    color: #fff;
+    padding: 18px 24px;
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .card-body { padding: 20px 24px 28px; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid #e0e0e0; text-align: left; vertical-align: top; }
+  th { background: #f3f3f3; font-weight: 600; white-space: nowrap; }
+  .badge { padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .badge-pending { background: #fff3cd; color: #8a6500; }
+  .badge-approved { background: #dff6dd; color: #1e6b1e; }
+  .badge-rejected { background: #fce8e8; color: #a92020; }
+  #refresh-btn {
+    background: #0078d4; color: #fff; border: none; border-radius: 4px;
+    padding: 6px 14px; font-size: 13px; cursor: pointer; margin-bottom: 14px;
+  }
+  #refresh-btn:hover { background: #006cbd; }
+  #message { padding: 12px 14px; border-radius: 4px; font-size: 14px; background: #fce8e8; color: #a92020; display: none; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">Fenevision Requests - Admin Dashboard</div>
+    <div class="card-body">
+      <button id="refresh-btn" onclick="load()">Refresh</button>
+      <div id="message"></div>
+      <table id="requests-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Submitted By</th>
+            <th>Type</th>
+            <th>Urgency</th>
+            <th>Status</th>
+            <th>Submitted</th>
+          </tr>
+        </thead>
+        <tbody id="requests-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function esc(value) {
+      const div = document.createElement("div");
+      div.textContent = value ?? "";
+      return div.innerHTML;
+    }
+
+    function formatCT(value) {
+      if (!value) return "";
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Chicago",
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(value)) + " CT";
+    }
+
+    function statusBadge(request) {
+      const total = request.approvals.length;
+      if (request.status === "approved") {
+        return `<span class="badge badge-approved">Approved</span>`;
+      }
+      if (request.status === "rejected") {
+        const rejected = request.approvals.find((a) => a.status === "rejected");
+        return `<span class="badge badge-rejected">Rejected${rejected ? " by " + esc(rejected.approver_name) + " (step " + rejected.step_number + ")" : ""}</span>`;
+      }
+      const current = request.approvals.find((a) => a.step_number === request.current_step);
+      return `<span class="badge badge-pending">Pending - step ${request.current_step}/${total}${current ? " (" + esc(current.approver_name) + ")" : ""}</span>`;
+    }
+
+    async function load() {
+      const messageEl = document.getElementById("message");
+      const body = document.getElementById("requests-body");
+      messageEl.style.display = "none";
+
+      try {
+        const res = await fetch("/api/admin/requests");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to load requests.");
+
+        body.innerHTML = data.requests
+          .map(
+            (r) => `
+            <tr>
+              <td>${r.id}</td>
+              <td>${esc(r.submitted_by)}<br><span style="color:#666;">${esc(r.submitted_by_email)}</span></td>
+              <td>${esc(r.request_type)}</td>
+              <td>${esc(r.urgency)}</td>
+              <td>${statusBadge(r)}</td>
+              <td>${formatCT(r.created_at)}</td>
+            </tr>
+          `
+          )
+          .join("");
+      } catch (err) {
+        messageEl.textContent = err.message;
+        messageEl.style.display = "block";
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>

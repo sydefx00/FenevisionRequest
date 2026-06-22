@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fenevision Request Form</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #e8e8e8;
+    margin: 0;
+    padding: 24px 12px 60px;
+    color: #222;
+  }
+  .card {
+    background: #fff;
+    max-width: 640px;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    overflow: hidden;
+  }
+  .card-header {
+    background: #0078d4;
+    color: #fff;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-header .card-title { font-size: 20px; font-weight: 700; }
+  .lang-btn {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .lang-btn:hover { background: rgba(255,255,255,0.35); }
+  .card-body { padding: 20px 24px 28px; }
+  .field { margin-bottom: 14px; }
+  .field label.field-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  input[type="text"], input[type="email"], select, textarea {
+    width: 100%;
+    padding: 9px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  textarea { min-height: 80px; resize: vertical; }
+  .row { display: flex; gap: 16px; }
+  .row .field { flex: 1; }
+  .submit-btn {
+    background: #0078d4;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .submit-btn:hover { background: #006cbd; }
+  .submit-btn:disabled { background: #aaa; cursor: default; }
+  #success-banner, #error-banner {
+    margin: 16px 0;
+    padding: 12px 14px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: none;
+  }
+  #success-banner { background: #dff6dd; color: #1e6b1e; }
+  #error-banner { background: #fce8e8; color: #a92020; }
+  #success-banner a { color: #1e6b1e; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title" data-key="title">Fenevision Request Form</div>
+      <button class="lang-btn" id="lang-btn" onclick="toggleLang()">ES</button>
+    </div>
+    <div class="card-body">
+      <form id="request-form">
+
+        <div class="field">
+          <label class="field-label" for="submitted_by" data-key="nameLabel">Name</label>
+          <input type="text" id="submitted_by" name="submitted_by" required>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="submitted_by_email" data-key="emailLabel">Email</label>
+          <input type="email" id="submitted_by_email" name="submitted_by_email" required>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label class="field-label" for="request_type" data-key="typeLabel">Request Type</label>
+            <select id="request_type" name="request_type" required>
+              <option value="" disabled selected data-key="selectOption">Select...</option>
+              <option data-key="typeNewAccess">New User Access</option>
+              <option data-key="typePermission">Permission Change</option>
+              <option data-key="typeDataCorrection">Data Correction</option>
+              <option data-key="typeBug">Report a Problem</option>
+              <option data-key="typeTraining">Training</option>
+              <option data-key="typeOther">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label" for="urgency" data-key="urgencyLabel">Urgency</label>
+            <select id="urgency" name="urgency" required>
+              <option value="" disabled selected data-key="selectOption">Select...</option>
+              <option data-key="urgencyLow">Low</option>
+              <option data-key="urgencyMedium">Medium</option>
+              <option data-key="urgencyHigh">High</option>
+              <option data-key="urgencyCritical">Critical</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" id="other-type-field" style="display:none">
+          <label class="field-label" for="request_type_other" data-key="typeOtherLabel">Please specify</label>
+          <input type="text" id="request_type_other" name="request_type_other">
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="description" data-key="descriptionLabel">Description</label>
+          <textarea id="description" name="description" required></textarea>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="notes" data-key="notesLabel">Notes (optional)</label>
+          <textarea id="notes" name="notes"></textarea>
+        </div>
+
+        <div id="success-banner"></div>
+        <div id="error-banner"></div>
+
+        <button type="submit" class="submit-btn" id="submit-btn" data-key="submitBtn">Submit Request</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const translations = {
+      en: {
+        title: "Fenevision Request Form",
+        nameLabel: "Name",
+        emailLabel: "Email",
+        typeLabel: "Request Type",
+        urgencyLabel: "Urgency",
+        selectOption: "Select...",
+        typeNewAccess: "New User Access",
+        typePermission: "Permission Change",
+        typeDataCorrection: "Data Correction",
+        typeBug: "Report a Problem",
+        typeTraining: "Training",
+        typeOther: "Other",
+        typeOtherLabel: "Please specify",
+        urgencyLow: "Low",
+        urgencyMedium: "Medium",
+        urgencyHigh: "High",
+        urgencyCritical: "Critical",
+        descriptionLabel: "Description",
+        notesLabel: "Notes (optional)",
+        submitBtn: "Submit Request",
+        missingFields: "Please fill in all required fields.",
+        submitting: "Submitting...",
+        successPrefix: "Request submitted. Your request ID is #",
+        statusLinkText: "Check status",
+      },
+      es: {
+        title: "Formulario de Solicitud de Fenevision",
+        nameLabel: "Nombre",
+        emailLabel: "Correo electrónico",
+        typeLabel: "Tipo de Solicitud",
+        urgencyLabel: "Urgencia",
+        selectOption: "Seleccionar...",
+        typeNewAccess: "Nuevo Acceso de Usuario",
+        typePermission: "Cambio de Permisos",
+        typeDataCorrection: "Corrección de Datos",
+        typeBug: "Reportar un Problema",
+        typeTraining: "Capacitación",
+        typeOther: "Otro",
+        typeOtherLabel: "Por favor especifique",
+        urgencyLow: "Baja",
+        urgencyMedium: "Media",
+        urgencyHigh: "Alta",
+        urgencyCritical: "Crítica",
+        descriptionLabel: "Descripción",
+        notesLabel: "Notas (opcional)",
+        submitBtn: "Enviar Solicitud",
+        missingFields: "Por favor complete todos los campos requeridos.",
+        submitting: "Enviando...",
+        successPrefix: "Solicitud enviada. Su número de solicitud es #",
+        statusLinkText: "Ver estado",
+      },
+    };
+
+    let lang = "en";
+
+    function applyTranslations() {
+      const t = translations[lang];
+      document.querySelectorAll("[data-key]").forEach((el) => {
+        const key = el.getAttribute("data-key");
+        if (t[key] !== undefined) el.textContent = t[key];
+      });
+    }
+
+    function toggleLang() {
+      lang = lang === "en" ? "es" : "en";
+      document.getElementById("lang-btn").textContent = lang === "en" ? "ES" : "EN";
+      applyTranslations();
+    }
+
+    const form = document.getElementById("request-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const successBanner = document.getElementById("success-banner");
+    const errorBanner = document.getElementById("error-banner");
+    const requestType = document.getElementById("request_type");
+    const otherTypeField = document.getElementById("other-type-field");
+    const requestTypeOther = document.getElementById("request_type_other");
+
+    requestType.addEventListener("change", () => {
+      const isOther = requestType.selectedOptions[0]?.dataset.key === "typeOther";
+      otherTypeField.style.display = isOther ? "block" : "none";
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      successBanner.style.display = "none";
+      errorBanner.style.display = "none";
+
+      const data = Object.fromEntries(new FormData(form).entries());
+      const isOther = requestType.selectedOptions[0]?.dataset.key === "typeOther";
+      if (isOther && requestTypeOther.value.trim()) {
+        data.request_type = requestTypeOther.value.trim();
+      }
+      delete data.request_type_other;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = translations[lang].submitting;
+
+      try {
+        const res = await fetch("/api/requests", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || "Submission failed.");
+
+        successBanner.innerHTML = `${translations[lang].successPrefix}${result.id} - <a href="/status/${result.id}">${translations[lang].statusLinkText}</a>`;
+        successBanner.style.display = "block";
+        form.reset();
+        otherTypeField.style.display = "none";
+      } catch (err) {
+        errorBanner.textContent = err.message;
+        errorBanner.style.display = "block";
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = translations[lang].submitBtn;
+      }
+    });
+  </script>
+</body>
+</html>
