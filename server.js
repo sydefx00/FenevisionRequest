@@ -126,6 +126,23 @@ app.get("/api/admin/requests", requireAdmin, async (req, res) => {
   }
 });
 
+app.post("/api/admin/requests/:id/resend", requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid request id." });
+
+  try {
+    const result = await workflow.resendCurrentApproval(id);
+    if (result.notFound) return res.status(404).json({ error: "Request or pending approval step not found." });
+    if (result.notPending) {
+      return res.status(409).json({ error: `Request is already ${result.status}; nothing to resend.` });
+    }
+    res.json({ ok: true, approverName: result.approverName, approverEmail: result.approverEmail });
+  } catch (err) {
+    console.error("Failed to resend approval email:", err);
+    res.status(500).json({ error: "Failed to resend approval email." });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Fenevision Request server listening on port ${PORT}`);
 });

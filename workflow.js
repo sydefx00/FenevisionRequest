@@ -152,6 +152,36 @@ async function getStatus(id) {
   return { request, approvals: approvalsResult.recordset };
 }
 
+async function resendCurrentApproval(requestId) {
+  const requestResult = await db.query(`SELECT * FROM requests WHERE id = @id`, { id: requestId });
+  const request = requestResult.recordset[0];
+  if (!request) return { notFound: true };
+  if (request.status !== "pending") return { notPending: true, status: request.status };
+
+  const approvalResult = await db.query(
+    `SELECT * FROM approvals WHERE request_id = @id AND step_number = @step`,
+    { id: requestId, step: request.current_step }
+  );
+  const approval = approvalResult.recordset[0];
+  if (!approval) return { notFound: true };
+
+  const totalResult = await db.query(
+    `SELECT COUNT(*) AS total FROM approvals WHERE request_id = @id`,
+    { id: requestId }
+  );
+
+  await mailer.sendApprovalRequestEmail({
+    to: approval.approver_email,
+    approverName: approval.approver_name,
+    request,
+    stepNumber: approval.step_number,
+    totalSteps: totalResult.recordset[0].total,
+    token: approval.token,
+  });
+
+  return { ok: true, approverName: approval.approver_name, approverEmail: approval.approver_email };
+}
+
 async function getAllRequests() {
   const requestsResult = await db.query(`SELECT * FROM requests ORDER BY created_at DESC`);
   const approvalsResult = await db.query(`SELECT * FROM approvals ORDER BY request_id, step_number`);
@@ -171,4 +201,5 @@ module.exports = {
   handleDecision,
   getStatus,
   getAllRequests,
+  resendCurrentApproval,
 };

@@ -41,6 +41,12 @@
     padding: 6px 14px; font-size: 13px; cursor: pointer; margin-bottom: 14px;
   }
   #refresh-btn:hover { background: #006cbd; }
+  .resend-btn {
+    background: #fff; color: #0078d4; border: 1px solid #0078d4; border-radius: 4px;
+    padding: 4px 10px; font-size: 12px; cursor: pointer; white-space: nowrap;
+  }
+  .resend-btn:hover { background: #e8f1fb; }
+  .resend-btn:disabled { background: #eee; color: #999; border-color: #ccc; cursor: default; }
   #message { padding: 12px 14px; border-radius: 4px; font-size: 14px; background: #fce8e8; color: #a92020; display: none; }
 </style>
 </head>
@@ -59,6 +65,7 @@
             <th>Urgency</th>
             <th>Status</th>
             <th>Submitted</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="requests-body"></tbody>
@@ -115,6 +122,7 @@
               <td>${esc(r.urgency)}</td>
               <td>${statusBadge(r)}</td>
               <td>${formatCT(r.created_at)}</td>
+              <td>${r.status === "pending" ? `<button class="resend-btn" onclick="resend(${r.id}, this)">Resend</button>` : ""}</td>
             </tr>
           `
           )
@@ -122,6 +130,24 @@
       } catch (err) {
         messageEl.textContent = err.message;
         messageEl.style.display = "block";
+      }
+    }
+
+    async function resend(id, btn) {
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Sending...";
+
+      try {
+        const res = await fetch(`/api/admin/requests/${id}/resend`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to resend.");
+
+        btn.textContent = `Sent to ${data.approverName}`;
+      } catch (err) {
+        btn.textContent = originalText;
+        btn.disabled = false;
+        alert(err.message);
       }
     }
 
