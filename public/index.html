@@ -25,21 +25,8 @@
     background: #0078d4;
     color: #fff;
     padding: 18px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
   }
   .card-header .card-title { font-size: 20px; font-weight: 700; }
-  .lang-btn {
-    background: rgba(255,255,255,0.2);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.5);
-    border-radius: 4px;
-    padding: 4px 10px;
-    font-size: 12px;
-    cursor: pointer;
-  }
-  .lang-btn:hover { background: rgba(255,255,255,0.35); }
   .card-body { padding: 20px 24px 28px; }
   .field { margin-bottom: 14px; }
   .field label.field-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
@@ -81,142 +68,70 @@
 <body>
   <div class="card">
     <div class="card-header">
-      <div class="card-title" data-key="title">Fenevision Request Form</div>
-      <button class="lang-btn" id="lang-btn" onclick="toggleLang()">ES</button>
+      <div class="card-title">Fenevision Request Form</div>
     </div>
     <div class="card-body">
       <form id="request-form">
 
         <div class="field">
-          <label class="field-label" for="submitted_by" data-key="nameLabel">Name</label>
+          <label class="field-label" for="submitted_by">Name</label>
           <input type="text" id="submitted_by" name="submitted_by" required>
         </div>
 
         <div class="field">
-          <label class="field-label" for="submitted_by_email" data-key="emailLabel">Email</label>
+          <label class="field-label" for="submitted_by_email">Email</label>
           <input type="email" id="submitted_by_email" name="submitted_by_email" required>
         </div>
 
         <div class="row">
           <div class="field">
-            <label class="field-label" for="request_type" data-key="typeLabel">Request Type</label>
+            <label class="field-label" for="request_type">Request Type</label>
             <select id="request_type" name="request_type" required>
-              <option value="" disabled selected data-key="selectOption">Select...</option>
-              <option data-key="typeNewAccess">New User Access</option>
-              <option data-key="typePermission">Permission Change</option>
-              <option data-key="typeDataCorrection">Data Correction</option>
-              <option data-key="typeBug">Report a Problem</option>
-              <option data-key="typeTraining">Training</option>
-              <option data-key="typeOther">Other</option>
+              <option value="" disabled selected>Select...</option>
+              <option>New User Access</option>
+              <option>Permission Change</option>
+              <option>Data Correction</option>
+              <option>Report a Problem</option>
+              <option>Training</option>
+              <option>Other</option>
             </select>
           </div>
           <div class="field">
-            <label class="field-label" for="urgency" data-key="urgencyLabel">Urgency</label>
+            <label class="field-label" for="urgency">Urgency</label>
             <select id="urgency" name="urgency" required>
-              <option value="" disabled selected data-key="selectOption">Select...</option>
-              <option data-key="urgencyLow">Low</option>
-              <option data-key="urgencyMedium">Medium</option>
-              <option data-key="urgencyHigh">High</option>
-              <option data-key="urgencyCritical">Critical</option>
+              <option value="" disabled selected>Select...</option>
+              <option>Low</option>
+              <option>Medium</option>
+              <option>High</option>
+              <option>Critical</option>
             </select>
           </div>
         </div>
 
         <div class="field" id="other-type-field" style="display:none">
-          <label class="field-label" for="request_type_other" data-key="typeOtherLabel">Please specify</label>
+          <label class="field-label" for="request_type_other">Please specify</label>
           <input type="text" id="request_type_other" name="request_type_other">
         </div>
 
         <div class="field">
-          <label class="field-label" for="description" data-key="descriptionLabel">Description</label>
+          <label class="field-label" for="description">Description</label>
           <textarea id="description" name="description" required></textarea>
         </div>
 
         <div class="field">
-          <label class="field-label" for="notes" data-key="notesLabel">Notes (optional)</label>
+          <label class="field-label" for="notes">Notes (optional)</label>
           <textarea id="notes" name="notes"></textarea>
         </div>
 
         <div id="success-banner"></div>
         <div id="error-banner"></div>
 
-        <button type="submit" class="submit-btn" id="submit-btn" data-key="submitBtn">Submit Request</button>
+        <button type="submit" class="submit-btn" id="submit-btn">Submit Request</button>
       </form>
     </div>
   </div>
 
   <script>
-    const translations = {
-      en: {
-        title: "Fenevision Request Form",
-        nameLabel: "Name",
-        emailLabel: "Email",
-        typeLabel: "Request Type",
-        urgencyLabel: "Urgency",
-        selectOption: "Select...",
-        typeNewAccess: "New User Access",
-        typePermission: "Permission Change",
-        typeDataCorrection: "Data Correction",
-        typeBug: "Report a Problem",
-        typeTraining: "Training",
-        typeOther: "Other",
-        typeOtherLabel: "Please specify",
-        urgencyLow: "Low",
-        urgencyMedium: "Medium",
-        urgencyHigh: "High",
-        urgencyCritical: "Critical",
-        descriptionLabel: "Description",
-        notesLabel: "Notes (optional)",
-        submitBtn: "Submit Request",
-        missingFields: "Please fill in all required fields.",
-        submitting: "Submitting...",
-        successPrefix: "Request submitted. Your request ID is #",
-        statusLinkText: "Check status",
-      },
-      es: {
-        title: "Formulario de Solicitud de Fenevision",
-        nameLabel: "Nombre",
-        emailLabel: "Correo electrónico",
-        typeLabel: "Tipo de Solicitud",
-        urgencyLabel: "Urgencia",
-        selectOption: "Seleccionar...",
-        typeNewAccess: "Nuevo Acceso de Usuario",
-        typePermission: "Cambio de Permisos",
-        typeDataCorrection: "Corrección de Datos",
-        typeBug: "Reportar un Problema",
-        typeTraining: "Capacitación",
-        typeOther: "Otro",
-        typeOtherLabel: "Por favor especifique",
-        urgencyLow: "Baja",
-        urgencyMedium: "Media",
-        urgencyHigh: "Alta",
-        urgencyCritical: "Crítica",
-        descriptionLabel: "Descripción",
-        notesLabel: "Notas (opcional)",
-        submitBtn: "Enviar Solicitud",
-        missingFields: "Por favor complete todos los campos requeridos.",
-        submitting: "Enviando...",
-        successPrefix: "Solicitud enviada. Su número de solicitud es #",
-        statusLinkText: "Ver estado",
-      },
-    };
-
-    let lang = "en";
-
-    function applyTranslations() {
-      const t = translations[lang];
-      document.querySelectorAll("[data-key]").forEach((el) => {
-        const key = el.getAttribute("data-key");
-        if (t[key] !== undefined) el.textContent = t[key];
-      });
-    }
-
-    function toggleLang() {
-      lang = lang === "en" ? "es" : "en";
-      document.getElementById("lang-btn").textContent = lang === "en" ? "ES" : "EN";
-      applyTranslations();
-    }
-
     const form = document.getElementById("request-form");
     const submitBtn = document.getElementById("submit-btn");
     const successBanner = document.getElementById("success-banner");
@@ -226,8 +141,7 @@
     const requestTypeOther = document.getElementById("request_type_other");
 
     requestType.addEventListener("change", () => {
-      const isOther = requestType.selectedOptions[0]?.dataset.key === "typeOther";
-      otherTypeField.style.display = isOther ? "block" : "none";
+      otherTypeField.style.display = requestType.value === "Other" ? "block" : "none";
     });
 
     form.addEventListener("submit", async (e) => {
@@ -236,14 +150,13 @@
       errorBanner.style.display = "none";
 
       const data = Object.fromEntries(new FormData(form).entries());
-      const isOther = requestType.selectedOptions[0]?.dataset.key === "typeOther";
-      if (isOther && requestTypeOther.value.trim()) {
+      if (requestType.value === "Other" && requestTypeOther.value.trim()) {
         data.request_type = requestTypeOther.value.trim();
       }
       delete data.request_type_other;
 
       submitBtn.disabled = true;
-      submitBtn.textContent = translations[lang].submitting;
+      submitBtn.textContent = "Submitting...";
 
       try {
         const res = await fetch("/api/requests", {
@@ -254,7 +167,7 @@
         const result = await res.json();
         if (!res.ok) throw new Error(result.error || "Submission failed.");
 
-        successBanner.innerHTML = `${translations[lang].successPrefix}${result.id} - <a href="/status/${result.id}">${translations[lang].statusLinkText}</a>`;
+        successBanner.innerHTML = `Request submitted. Your request ID is #${result.id} - <a href="/status/${result.id}">Check status</a>`;
         successBanner.style.display = "block";
         form.reset();
         otherTypeField.style.display = "none";
@@ -263,7 +176,7 @@
         errorBanner.style.display = "block";
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = translations[lang].submitBtn;
+        submitBtn.textContent = "Submit Request";
       }
     });
   </script>
