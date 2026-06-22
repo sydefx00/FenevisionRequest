@@ -40,6 +40,11 @@
   .badge-pending { background: #fff3cd; color: #8a6500; }
   .badge-approved { background: #dff6dd; color: #1e6b1e; }
   .badge-rejected { background: #fce8e8; color: #a92020; }
+  .badge-skipped { background: #eee; color: #777; }
+  .detail-row td { background: #fafafa; }
+  .detail-block { padding: 6px 4px 10px; }
+  .detail-block .timeline-item { margin-bottom: 8px; }
+  .action-cell { display: flex; gap: 6px; }
   #refresh-btn {
     background: #0078d4; color: #fff; border: none; border-radius: 4px;
     padding: 6px 14px; font-size: 13px; cursor: pointer; margin-bottom: 14px;
@@ -106,6 +111,35 @@
       return `<span class="badge badge-pending">Pending - step ${request.current_step}/${total}${current ? " (" + esc(current.approver_name) + ")" : ""}</span>`;
     }
 
+    function renderDetails(r) {
+      const timeline = r.approvals
+        .map(
+          (a) => `
+          <div class="timeline-item">
+            <strong>Step ${a.step_number} - ${esc(a.approver_name)}</strong>
+            <span class="badge badge-${a.status}">${esc(a.status)}</span>
+            ${a.decided_at ? `<span style="color:#666;font-size:12px;"> - ${formatCT(a.decided_at)}</span>` : ""}
+            ${a.comments ? `<div style="margin-top:2px;color:#444;">${esc(a.comments)}</div>` : ""}
+          </div>
+        `
+        )
+        .join("");
+
+      return `
+        <div class="detail-block">
+          <div style="margin-bottom:8px;"><strong>Description:</strong> ${esc(r.description)}</div>
+          ${r.notes ? `<div style="margin-bottom:8px;"><strong>Notes:</strong> ${esc(r.notes)}</div>` : ""}
+          <div style="margin-bottom:4px;"><strong>Approval Timeline:</strong></div>
+          ${timeline}
+        </div>
+      `;
+    }
+
+    function toggleDetails(id) {
+      const row = document.getElementById(`detail-${id}`);
+      row.style.display = row.style.display === "none" ? "table-row" : "none";
+    }
+
     async function load() {
       const messageEl = document.getElementById("message");
       const body = document.getElementById("requests-body");
@@ -126,7 +160,15 @@
               <td>${esc(r.urgency)}</td>
               <td>${statusBadge(r)}</td>
               <td>${formatCT(r.created_at)}</td>
-              <td>${r.status === "pending" ? `<button class="resend-btn" onclick="resend(${r.id}, this)">Resend</button>` : ""}</td>
+              <td>
+                <div class="action-cell">
+                  <button class="resend-btn" onclick="toggleDetails(${r.id})">Details</button>
+                  ${r.status === "pending" ? `<button class="resend-btn" onclick="resend(${r.id}, this)">Resend</button>` : ""}
+                </div>
+              </td>
+            </tr>
+            <tr id="detail-${r.id}" class="detail-row" style="display:none">
+              <td colspan="7">${renderDetails(r)}</td>
             </tr>
           `
           )
