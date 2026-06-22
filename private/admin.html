@@ -27,7 +27,11 @@
     padding: 18px 24px;
     font-size: 20px;
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
+  .card-header img { height: 28px; }
   .card-body { padding: 20px 24px 28px; overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-size: 13px; }
   th, td { padding: 8px 10px; border-bottom: 1px solid #e0e0e0; text-align: left; vertical-align: top; }
@@ -52,7 +56,7 @@
 </head>
 <body>
   <div class="card">
-    <div class="card-header">Fenevision Requests - Admin Dashboard</div>
+    <div class="card-header"><img src="/midway-logo.png" alt="Midway"> Fenevision Requests - Admin Dashboard</div>
     <div class="card-body">
       <button id="refresh-btn" onclick="load()">Refresh</button>
       <div id="message"></div>

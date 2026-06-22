@@ -27,7 +27,11 @@
     padding: 18px 24px;
     font-size: 20px;
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
+  .card-header img { height: 28px; }
   .card-body { padding: 20px 24px 28px; }
   table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
   td { padding: 6px 0; vertical-align: top; }
@@ -44,7 +48,7 @@
 </head>
 <body>
   <div class="card">
-    <div class="card-header">Fenevision Request Status</div>
+    <div class="card-header"><img src="/midway-logo.png" alt="Midway"> Fenevision Request Status</div>
     <div class="card-body" id="card-body">Loading...</div>
   </div>
 

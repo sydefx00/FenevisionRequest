@@ -26,7 +26,8 @@
     color: #fff;
     padding: 18px 24px;
   }
-  .card-header .card-title { font-size: 20px; font-weight: 700; }
+  .card-header .card-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  .card-header .card-title img { height: 28px; }
   .card-header .step-label { font-size: 12px; opacity: 0.85; margin-top: 2px; }
   .card-body { padding: 20px 24px 28px; }
   table { border-collapse: collapse; width: 100%; margin-bottom: 18px; }
@@ -71,7 +72,7 @@
 <body>
   <div class="card">
     <div class="card-header">
-      <div class="card-title">Fenevision Request Approval</div>
+      <div class="card-title"><img src="/midway-logo.png" alt="Midway"> Fenevision Request Approval</div>
       <div class="step-label" id="step-label"></div>
     </div>
     <div class="card-body" id="card-body">
